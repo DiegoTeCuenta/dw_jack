@@ -228,13 +228,16 @@
       /* ---------- chapter divider ---------- */
       .divider { overflow: hidden; justify-content: flex-end; }
       .divider .big-num {
-        position: absolute; right: clamp(-10px, 1vw, 24px); top: 50%;
-        transform: translateY(-54%);
+        position: absolute; right: clamp(10px, 3vw, 56px); top: clamp(12px, 5svh, 56px);
         font-family: var(--display);
-        font-size: clamp(300px, 78svh, 760px);
+        font-size: clamp(200px, 50svh, 520px);
         line-height: 1; color: var(--ink); user-select: none;
       }
-      .divider-meta { position: relative; z-index: 2; padding: 0 clamp(20px, 6vw, 84px) clamp(38px, 7svh, 72px); }
+      .divider-meta { position: relative; z-index: 2; max-width: min(780px, 66%); padding: 0 clamp(20px, 6vw, 84px) clamp(38px, 7svh, 72px); }
+      @media (max-width: 760px) {
+        .divider .big-num { font-size: clamp(150px, 32svh, 280px); top: clamp(14px, 9svh, 84px); right: 16px; }
+        .divider-meta { max-width: 100%; }
+      }
       .divider-kicker {
         font-family: var(--narrow); letter-spacing: .3em; text-transform: uppercase;
         font-size: clamp(12px, 1.5vw, 15px); font-weight: 600; margin: 0 0 8px;

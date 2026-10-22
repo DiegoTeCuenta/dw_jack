@@ -167,6 +167,64 @@
       }
       .explore-btn:hover { background: var(--paper); color: var(--ink); }
 
+      /* ---------- map modal ---------- */
+      #mapModal {
+        position: fixed; inset: 0; z-index: 80;
+        display: none; align-items: center; justify-content: center;
+        padding: 18px;
+      }
+      #mapModal.open { display: flex; }
+      #mapModal .modal-backdrop {
+        position: absolute; inset: 0; background: rgba(10,10,9,.66);
+      }
+      #mapModal .modal-dialog {
+        position: relative; z-index: 1; width: min(920px, 100%);
+        max-height: calc(100svh - 36px); display: flex; flex-direction: column;
+        background: var(--paper); color: var(--ink);
+        border: 2px solid var(--ink); box-shadow: 10px 10px 0 rgba(0,0,0,.35);
+      }
+      #mapModal .modal-head {
+        display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        padding: 16px 20px; border-bottom: 2px solid var(--ink);
+      }
+      #mapModal .modal-title {
+        font-family: var(--display); font-weight: 400; text-transform: uppercase;
+        font-size: clamp(20px, 3.4vw, 30px); line-height: 1.05; margin: 0;
+      }
+      #mapModal .modal-sub {
+        font-family: var(--narrow); letter-spacing: .2em; text-transform: uppercase;
+        font-size: 11px; font-weight: 600; opacity: .6; margin: 4px 0 0;
+      }
+      #mapModal .modal-close {
+        flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px;
+        background: var(--ink); color: var(--paper); border: 2px solid var(--ink);
+        padding: 9px 14px; font-family: var(--narrow); font-weight: 600;
+        letter-spacing: .18em; text-transform: uppercase; font-size: 12px;
+        transition: background-color .2s ease, color .2s ease;
+      }
+      #mapModal .modal-close:hover { background: var(--paper); color: var(--ink); }
+      #mapModal .modal-close .x { font-size: 15px; line-height: 1; }
+      #mapModal .modal-map { position: relative; background: #e8e6df; }
+      #mapModal .modal-map iframe {
+        display: block; width: 100%; height: min(56svh, 520px); border: 0;
+      }
+      #mapModal .modal-foot {
+        display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+        padding: 14px 20px; border-top: 2px solid var(--ink);
+      }
+      #mapModal .modal-foot p {
+        margin: 0; font-size: 13.5px; font-weight: 500; color: #3d3d3a; max-width: 46ch; line-height: 1.45;
+      }
+      #mapModal .modal-open-maps {
+        flex: 0 0 auto; display: inline-block; text-decoration: none;
+        background: var(--paper); color: var(--ink); border: 2px solid var(--ink);
+        padding: 12px 20px; font-family: var(--narrow); font-weight: 600;
+        letter-spacing: .2em; text-transform: uppercase; font-size: 13px;
+        transition: background-color .2s ease, color .2s ease;
+      }
+      #mapModal .modal-open-maps:hover { background: var(--ink); color: var(--paper); }
+      body.modal-open { overflow: hidden; }
+
       /* ---------- chapter divider ---------- */
       .divider { overflow: hidden; justify-content: flex-end; }
       .divider .big-num {
@@ -574,6 +632,41 @@
       <button class="back-top reveal" type="button" id="backTop">↑ Back to the map</button>
     </footer>
 
+    <!-- ============ MAP MODAL ============ -->
+    <div id="mapModal" role="dialog" aria-modal="true" aria-labelledby="mapModalTitle" aria-hidden="true">
+      <div class="modal-backdrop" data-close-map></div>
+      <div class="modal-dialog">
+        <div class="modal-head">
+          <div>
+            <h3 class="modal-title" id="mapModalTitle">Tabernas · Almería</h3>
+            <p class="modal-sub">Tabernas, Almería, España — the Western film sets</p>
+          </div>
+          <button class="modal-close" type="button" id="mapModalClose" aria-label="Close map">
+            <span class="x" aria-hidden="true">✕</span><span>Close</span>
+          </button>
+        </div>
+        <div class="modal-map">
+          <iframe
+            id="mapModalFrame"
+            title="Google Maps — Tabernas, Almería, España"
+            data-src="https://www.google.com/maps?q=Tabernas,+Almer%C3%ADa,+Espa%C3%B1a&output=embed"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen
+          ></iframe>
+        </div>
+        <div class="modal-foot">
+          <p>Home of the Tabernas Desert film sets — the classic spaghetti-western locations of Almería.</p>
+          <a
+            class="modal-open-maps"
+            href="https://www.google.com/maps/search/?api=1&query=Tabernas%20Almer%C3%ADa%20Espa%C3%B1a"
+            target="_blank"
+            rel="noopener noreferrer"
+          >Abrir en Google Maps ↗</a>
+        </div>
+      </div>
+    </div>
+
     <script>
       (function () {
         "use strict";
@@ -616,7 +709,32 @@
         navButtons.forEach(function (b) {
           b.addEventListener("click", function () { goTo(b.getAttribute("data-target")); });
         });
-        document.getElementById("exploreBtn").addEventListener("click", function () { goTo("divider-1"); });
+        /* ---------- map modal (stays inside the deck) ---------- */
+        var exploreBtn = document.getElementById("exploreBtn");
+        var mapModal = document.getElementById("mapModal");
+        var mapFrame = document.getElementById("mapModalFrame");
+        var mapCloseBtn = document.getElementById("mapModalClose");
+        function openMapModal() {
+          if (!mapFrame.getAttribute("src")) {
+            mapFrame.setAttribute("src", mapFrame.getAttribute("data-src"));
+          }
+          mapModal.classList.add("open");
+          mapModal.setAttribute("aria-hidden", "false");
+          document.body.classList.add("modal-open");
+          mapCloseBtn.focus();
+        }
+        function closeMapModal() {
+          mapModal.classList.remove("open");
+          mapModal.setAttribute("aria-hidden", "true");
+          document.body.classList.remove("modal-open");
+          exploreBtn.focus();
+        }
+        exploreBtn.addEventListener("click", openMapModal);
+        mapCloseBtn.addEventListener("click", closeMapModal);
+        mapModal.querySelector("[data-close-map]").addEventListener("click", closeMapModal);
+        document.addEventListener("keydown", function (ev) {
+          if (ev.key === "Escape" && mapModal.classList.contains("open")) closeMapModal();
+        });
         document.getElementById("scrollHint").addEventListener("click", function () { goTo("map"); });
         document.getElementById("backTop").addEventListener("click", function () { goTo("map"); });
 
